@@ -12,7 +12,7 @@ import (
 )
 
 func TestGETCars(t *testing.T) {
-	server := &VehicleServer{}
+	server := &VehicleServer{handler: NewInMemoryVehicleStatusHandler()}
 	t.Run("returns status of one car", func(t *testing.T) {
 		request := newGetCarStatusRequest("1")
 		response := httptest.NewRecorder()
@@ -59,26 +59,22 @@ func TestGETCars(t *testing.T) {
 	})
 }
 
-var POST_REQUEST_BODY = JSONResponse{
-	Error:   false,
-	Message: "successfully created",
-	VehicleStatus: VehicleStatus{
-		VehicleId:    2,
-		FuelLevel:    65,
-		BatteryLevel: 40,
-		EngineStatus: "Normal",
-		SensorStatus: SensorStatus{
-			FrontCamera: "Operational",
-			RearCamera:  "Operational",
-			Radar:       "Operational",
-			Lidar:       "Operational",
-		},
+var POST_REQUEST_BODY = VehicleStatus{
+	VehicleId:    2,
+	FuelLevel:    65,
+	BatteryLevel: 40,
+	EngineStatus: "Normal",
+	SensorStatus: SensorStatus{
+		FrontCamera: "Operational",
+		RearCamera:  "Operational",
+		Radar:       "Operational",
+		Lidar:       "Operational",
 	},
 }
 
 func TestPOSTCars(t *testing.T) {
 
-	server := &VehicleServer{}
+	server := &VehicleServer{handler: NewInMemoryVehicleStatusHandler()}
 
 	t.Run("returns accepted on POST", func(t *testing.T) {
 		request := newPostCarStatusRequest("2")

@@ -51,20 +51,43 @@ func (vs *VehicleServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		vehicleStatus, err := vs.handler.GetVehicleStatus(vehicleID)
+		vehicleStatus, err := vs.handler.GetVehicleStatus(uint(carId))
 		if err != nil {
-			writeJSON(w, http.StatusInternalServerError, JSONResponse{
+			writeJson(w, http.StatusInternalServerError, JSONResponse{
 				Error:   true,
 				Message: err.Error(),
 			})
 			return
 		}
-		writeJSON(w, http.StatusOK, JSONResponse{
+		writeJson(w, http.StatusAccepted, JSONResponse{
 			Error:         false,
 			VehicleStatus: vehicleStatus,
-		})	case http.MethodPost:
-		newStatus := VehicleStatus{}
-		vs.handler.PostVehicleStatus(uint(carId), newStatus)
+		})
+
+	case http.MethodPost:
+		var newStatus VehicleStatus
+		decoder := json.NewDecoder(r.Body)
+		err := decoder.Decode(&newStatus)
+		if err != nil {
+			writeJson(w, http.StatusInternalServerError, JSONResponse{
+				Error:   true,
+				Message: err.Error(),
+			})
+			return
+		}
+		vehicleStatus, err := vs.handler.PostVehicleStatus(uint(carId), newStatus)
+		if err != nil {
+			writeJson(w, http.StatusInternalServerError, JSONResponse{
+				Error:   true,
+				Message: err.Error(),
+			})
+			return
+		}
+		writeJson(w, http.StatusAccepted, JSONResponse{
+			Error:         false,
+			Message:       "successfully created",
+			VehicleStatus: vehicleStatus,
+		})
 	}
 
 }
